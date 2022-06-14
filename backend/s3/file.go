@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -182,7 +183,7 @@ func (f *File) CopyToLocation(location vfs.Location) (vfs.File, error) {
 
 // Delete clears any local temp file, or write buffer from read/writes to the file, then makes
 // a DeleteObject call to s3 for the file. Returns any error returned by the API.
-func (f *File) Delete() error {
+func (f *File) Delete(delOpts ...vfs.DeleteOption) error {
 	f.writeBuffer = nil
 	if err := f.Close(); err != nil {
 		return err
@@ -191,6 +192,16 @@ func (f *File) Delete() error {
 	client, err := f.fileSystem.Client()
 	if err != nil {
 		return err
+	}
+
+	for _, opt := range delOpts {
+		switch opt.Name {
+		case vfs.RemoveAllVersions:
+			if opt.Value == "true" {
+				// TODO Retrieve all versions
+				// TODO Delete all versions
+			}
+		}
 	}
 
 	_, err = client.DeleteObject(&s3.DeleteObjectInput{

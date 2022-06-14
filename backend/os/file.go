@@ -29,8 +29,29 @@ type File struct {
 	fileOpener  opener
 }
 
+func WithFilePermission(perm string) vfs.DeleteOption {
+	return FilePermissions{
+		permission: perm,
+	}
+}
+
+type FilePermissions struct {
+	permission string
+}
+
+func (f FilePermissions) IsDeleteOption() {}
+
 // Delete unlinks the file returning any error or nil.
-func (f *File) Delete() error {
+func (f *File) Delete(opts ...vfs.DeleteOption) error {
+
+	for _, o := range opts {
+		switch o.(type) {
+		case FilePermissions:
+			// do previous version
+		}
+	}
+	}
+
 	err := os.Remove(f.Path())
 	if err == nil {
 		f.file = nil

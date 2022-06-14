@@ -182,7 +182,7 @@ func (f *File) CopyToLocation(location vfs.Location) (vfs.File, error) {
 
 // Delete clears any local temp file, or write buffer from read/writes to the file, then makes
 // a DeleteObject call to s3 for the file. Returns any error returned by the API.
-func (f *File) Delete() error {
+func (f *File) Delete(options ...func(*vfs.DeleteOptions)) error {
 	f.writeBuffer = nil
 	if err := f.Close(); err != nil {
 		return err
@@ -193,11 +193,22 @@ func (f *File) Delete() error {
 		return err
 	}
 
-	_, err = client.DeleteObject(&s3.DeleteObjectInput{
-		Key:    &f.key,
-		Bucket: &f.bucket,
-	})
-	return err
+	delOpts := &vfs.DeleteOptions{}
+	for _, o := range options {
+		o(delOpts)
+	}
+
+	if delOpts.RemoveAllVersions {
+		// TODO fetch all versions
+		// TODO remove all versions
+		return nil
+	} else {
+		_, err = client.DeleteObject(&s3.DeleteObjectInput{
+			Key:    &f.key,
+			Bucket: &f.bucket,
+		})
+		return err
+	}
 }
 
 // Close cleans up underlying mechanisms for reading from and writing to the file. Closes and removes the

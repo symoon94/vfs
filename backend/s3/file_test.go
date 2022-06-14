@@ -548,6 +548,9 @@ func (ts *fileTestSuite) TestDelete() {
 	err := testFile.Delete()
 	ts.Nil(err, "Successful delete should not return an error.")
 	s3apiMock.AssertExpectations(ts.T())
+
+	// EXAMPLE:
+	// testFile.Delete(vfs.WithRemoveAllVersions())
 }
 
 func (ts *fileTestSuite) TestLastModified() {

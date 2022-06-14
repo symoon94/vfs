@@ -195,7 +195,7 @@ type File interface {
 	MoveToFile(file File) error
 
 	// Delete unlinks the File on the file system.
-	Delete() error
+	Delete(deleteOpts ...func(deleteOpts *DeleteOptions)) error
 
 	// LastModified returns the timestamp the file was last modified (as *time.Time).
 	LastModified() (*time.Time, error)
@@ -241,4 +241,14 @@ type Retry func(wrapped func() error) error
 // DefaultRetryer returns a no-op retryer which simply calls the wrapped command without looping.
 func DefaultRetryer() Retry {
 	return func(c func() error) error { return c() }
+}
+
+func WithRemoveAllVersions() func(deleteOpts *DeleteOptions) {
+	return func(deleteOpts *DeleteOptions) {
+		deleteOpts.RemoveAllVersions = true
+	}
+}
+
+type DeleteOptions struct {
+	RemoveAllVersions bool
 }

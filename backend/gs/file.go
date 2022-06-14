@@ -14,6 +14,7 @@ import (
 
 	"github.com/c2fo/vfs/v6"
 	"github.com/c2fo/vfs/v6/backend"
+	"github.com/c2fo/vfs/v6/backend/options/deleteopts"
 	"github.com/c2fo/vfs/v6/utils"
 )
 
@@ -207,7 +208,16 @@ func (f *File) MoveToFile(file vfs.File) error {
 
 // Delete clears any local temp file, or write buffer from read/writes to the file, then makes
 // a DeleteObject call to GCS for the file. Returns any error returned by the API.
-func (f *File) Delete() error {
+func (f *File) Delete(opts ...vfs.DeleteOption) error {
+	for _, o := range opts {
+		switch o.DeleteOptionName() {
+		case deleteopts.OptionNameDeleteAllVersions:
+		// get all versions
+		// delete each version marker
+		case deleteopts.OptionNamePanicOnDelete:
+			panic("holy cow, someone it trying to delete")
+		}
+	}
 	f.writeBuffer = nil
 	if err := f.Close(); err != nil {
 		return err

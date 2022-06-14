@@ -11,12 +11,13 @@ import (
 
 	"github.com/c2fo/vfs/v6"
 	"github.com/c2fo/vfs/v6/backend"
+	"github.com/c2fo/vfs/v6/backend/options/deleteopts"
 	"github.com/c2fo/vfs/v6/utils"
 )
 
 const osCrossDeviceLinkError = "invalid cross-device link"
 
-type opener func(filePath string) (*os.File, error)
+type opener func(filePath string, mode os.FileMode) (*os.File, error)
 
 // File implements vfs.File interface for os fs.
 type File struct {
@@ -27,29 +28,16 @@ type File struct {
 	tempFile    *os.File
 	useTempFile bool
 	fileOpener  opener
+	permissions uint32
 }
-
-func WithFilePermission(perm string) vfs.DeleteOption {
-	return FilePermissions{
-		permission: perm,
-	}
-}
-
-type FilePermissions struct {
-	permission string
-}
-
-func (f FilePermissions) IsDeleteOption() {}
 
 // Delete unlinks the file returning any error or nil.
 func (f *File) Delete(opts ...vfs.DeleteOption) error {
-
 	for _, o := range opts {
-		switch o.(type) {
-		case FilePermissions:
-			// do previous version
+		switch o.DeleteOptionName() {
+		case deleteopts.OptionNamePanicOnDelete:
+			panic("holy cow, someone it trying to delete")
 		}
-	}
 	}
 
 	err := os.Remove(f.Path())
@@ -377,7 +365,7 @@ func (f *File) openFile() (*os.File, error) {
 		openFunc = f.fileOpener
 	}
 
-	file, err := openFunc(f.Path())
+	file, err := openFunc(f.Path(), os.FileMode(f.permissions))
 	if err != nil {
 		return nil, err
 	}
@@ -386,15 +374,14 @@ func (f *File) openFile() (*os.File, error) {
 	return file, nil
 }
 
-func openOSFile(filePath string) (*os.File, error) {
+func openOSFile(filePath string, perms os.FileMode) (*os.File, error) {
 
 	// Ensure the path exists before opening the file, NoOp if dir already exists.
-	var fileMode os.FileMode = 0666
 	if err := os.MkdirAll(path.Dir(filePath), os.ModeDir|0777); err != nil {
 		return nil, err
 	}
 
-	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, fileMode) //nolint:gosec
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, perms) //nolint:gosec
 	return file, err
 }
 
@@ -423,7 +410,7 @@ func (f *File) getInternalFile() (*os.File, error) {
 				openFunc = f.fileOpener
 			}
 
-			finalFile, err := openFunc(f.Path())
+			finalFile, err := openFunc(f.Path(), os.FileMode(f.permissions))
 			if err != nil {
 				return nil, err
 			}
@@ -454,7 +441,7 @@ func (f *File) copyToLocalTempReader() (*os.File, error) {
 		openFunc = f.fileOpener
 	}
 
-	if _, err = openFunc(f.Path()); err != nil {
+	if _, err = openFunc(f.Path(), os.FileMode(0666)); err != nil {
 		return nil, err
 	}
 	// todo: editing in place logic/appending logic (see issue #42)

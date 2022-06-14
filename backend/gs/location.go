@@ -156,7 +156,7 @@ func (l *Location) FileSystem() vfs.FileSystem {
 }
 
 // NewFile returns a new file instance at the given path, relative to the current location.
-func (l *Location) NewFile(filePath string) (vfs.File, error) {
+func (l *Location) NewFile(filePath string, opts ...vfs.FileAttrsOption) (vfs.File, error) {
 	if l == nil {
 		return nil, errors.New("non-nil gs.Location pointer is required")
 	}
@@ -176,13 +176,13 @@ func (l *Location) NewFile(filePath string) (vfs.File, error) {
 }
 
 // DeleteFile deletes the file at the given path, relative to the current location.
-func (l *Location) DeleteFile(fileName string) error {
+func (l *Location) DeleteFile(fileName string, opts ...vfs.DeleteOption) error {
 	file, err := l.NewFile(fileName)
 	if err != nil {
 		return err
 	}
 
-	return file.Delete()
+	return file.Delete(opts...)
 }
 
 // URI returns a URI string for the GCS location.

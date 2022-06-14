@@ -18,6 +18,7 @@ import (
 
 	"github.com/c2fo/vfs/v6"
 	"github.com/c2fo/vfs/v6/backend"
+	"github.com/c2fo/vfs/v6/backend/options/deleteopts"
 	"github.com/c2fo/vfs/v6/mocks"
 	"github.com/c2fo/vfs/v6/utils"
 )
@@ -29,6 +30,7 @@ type File struct {
 	key         string
 	tempFile    *os.File
 	writeBuffer *bytes.Buffer
+	ss3Algo     string
 }
 
 // Downloader interface needed to mock S3 Downloader data access object in tests
@@ -179,21 +181,14 @@ func (f *File) CopyToLocation(location vfs.Location) (vfs.File, error) {
 }
 
 // CRUD Operations
-func WithDeleteAllVersion() vfs.DeleteOption {
-	return DeleteAllVersions{}
-}
-
-type DeleteAllVersions struct{}
-
-func (w DeleteAllVersions) ApplyDeleteOption() {}
 
 // Delete clears any local temp file, or write buffer from read/writes to the file, then makes
 // a DeleteObject call to s3 for the file. Returns any error returned by the API.
 func (f *File) Delete(opts ...vfs.DeleteOption) error {
 	for _, o := range opts {
-		switch o.(type) {
-		case DeleteAllVersions:
-			// do previous version
+		switch o.DeleteOptionName() {
+		case deleteopts.OptionNamePanicOnDelete:
+			panic("holy cow, someone it trying to delete")
 		}
 	}
 

@@ -32,7 +32,7 @@ func (fs *FileSystem) Retry() vfs.Retry {
 }
 
 // NewFile function returns the gcs implementation of vfs.File.
-func (fs *FileSystem) NewFile(volume, name string) (vfs.File, error) {
+func (fs *FileSystem) NewFile(volume, name string, opts ...vfs.FileAttrsOption) (vfs.File, error) {
 	if fs == nil {
 		return nil, errors.New("non-nil gs.FileSystem pointer is required")
 	}

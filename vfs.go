@@ -20,7 +20,7 @@ type FileSystem interface {
 	//       s3://mybucket/path/to/file has a volume of "mybucket and name /path/to/file
 	//     results in /tmp/dir1/newerdir/file.txt for the final vfs.File path.
 	//   * The file may or may not already exist.
-	NewFile(volume string, absFilePath string) (File, error)
+	NewFile(volume string, absFilePath string, opts ...FileAttrsOption) (File, error)
 
 	// NewLocation initializes a Location on the specified volume with the given path.
 	//
@@ -121,7 +121,7 @@ type Location interface {
 	//       results in /tmp/dir1/newerdir/file.txt for the final vfs.File path.
 	//   * Upon success, a vfs.File, representing the file's new path (location path + file relative path), will be returned.
 	//   * The file may or may not already exist.
-	NewFile(relFilePath string) (File, error)
+	NewFile(relFilePath string, opts ...FileAttrsOption) (File, error)
 
 	// DeleteFile deletes the file of the given name at the location.
 	//
@@ -129,7 +129,7 @@ type Location interface {
 	// error handling overhead.
 	//
 	// * Accepts relative file path.
-	DeleteFile(relFilePath string) error
+	DeleteFile(relFilePath string, opts ...DeleteOption) error
 
 	// URI returns the fully qualified absolute URI for the Location.  IE, s3://bucket/some/path/
 	//
@@ -226,7 +226,11 @@ type File interface {
 type Options interface{}
 
 type DeleteOption interface {
-	IsDeleteOption() // does nothing but ensure that this the implemetiation is specifically a delete option
+	DeleteOptionName() string
+}
+
+type FileAttrsOption interface {
+	FileAttrsOptionName() string
 }
 
 // Retry is a function that can be used to wrap any operation into a definable retry operation. The wrapped argument

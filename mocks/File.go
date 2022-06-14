@@ -63,7 +63,7 @@ func (_m *File) CopyToLocation(location vfs.Location) (vfs.File, error) {
 }
 
 // Delete provides a mock function with given fields:
-func (_m *File) Delete() error {
+func (_m *File) Delete(opts ...vfs.DeleteOption) error {
 	ret := _m.Called()
 
 	var r0 error

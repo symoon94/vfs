@@ -20,7 +20,7 @@ type Permissions struct {
 }
 
 func (p Permissions) FileAttrsOptionName() string {
-	return OptionNameSSE
+	return OptionNamePermissions
 }
 
 func (p Permissions) GetPermissions() uint32 {

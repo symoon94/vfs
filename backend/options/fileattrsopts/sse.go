@@ -10,7 +10,7 @@ const OptionNameSSE = "SSE"
 
 // WithSSE allows 'NONE' or 'AES256' (default)
 func WithSSE(algo string) vfs.FileAttrsOption {
-	if strings.ToLower(algo) != "none" {
+	if !strings.EqualFold(algo, "NONE") {
 		algo = "AES256"
 	}
 	return SSE{

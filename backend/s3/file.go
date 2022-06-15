@@ -189,6 +189,9 @@ func (f *File) Delete(opts ...vfs.DeleteOption) error {
 		switch o.DeleteOptionName() {
 		case deleteopts.OptionNamePanicOnDelete:
 			panic("holy cow, someone it trying to delete")
+		case deleteopts.OptionNameDeleteAllVersions:
+			// get all versions
+			// delete each version marker
 		}
 	}
 
